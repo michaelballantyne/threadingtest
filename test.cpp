@@ -19,10 +19,11 @@ int fact(int val) {
 void runFact(int times) {
     long res = 0;
     for (int i = 0; i < times; i++) {
-        for (int j = 0; j < 10000; j++) {
+        for (int j = 0; j < 100; j++) {
             res += fact(j);
         }
     }
+    __asm__ __volatile__("" :: "m" (res));
 }
 
 int main(int argc, const char *argv[])

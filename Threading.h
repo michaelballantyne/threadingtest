@@ -29,7 +29,9 @@ class Threading {
                 tasksArray[i]->store(&tasks[i], boost::memory_order_relaxed);
             }
 
-            remaining.store(nthreads - 1, boost::memory_order_release);
+            remaining.store(nthreads - 1, boost::memory_order_relaxed);
+
+            atomic_thread_fence(boost::memory_order_release);
 
             tasks[0]();
 
@@ -67,6 +69,7 @@ class Threading {
 
         // I probably don't need this whole thing at all.
         ~Threading() {
+
             // Interrupt and threads and wait for them to die.
             for (int i = 1; i < nthreads; i++) {
                 threadsArray[i]->interrupt();
