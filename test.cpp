@@ -55,7 +55,7 @@ int main(int argc, const char *argv[])
     }
     boost::posix_time::ptime endTime = boost::posix_time::microsec_clock::universal_time();
 
-    std::cout << endTime - startTime;
+    std::cout << (endTime - startTime).total_milliseconds() << std::endl;
 
     return 0;
 }
