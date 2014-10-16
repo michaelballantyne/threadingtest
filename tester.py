@@ -2,11 +2,13 @@ import argparse
 import subprocess
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--tasksize", type=int)
+parser.add_argument("--taskmult", type=int)
 parser.add_argument("--times", type=int)
 parser.add_argument("--nthreads", type=int)
 
 args = parser.parse_args()
+
+tasksize = args.taskmult * args.nthreads
 
 def time_run(tasksize, times, nthreads):
     out = subprocess.check_output(["./a.out", "--tasksize", str(tasksize),
@@ -14,8 +16,8 @@ def time_run(tasksize, times, nthreads):
 
     return int(out)
 
-single = time_run(args.tasksize, args.times, 1)
-multiple = time_run(args.tasksize, args.times, args.nthreads)
+single = time_run(tasksize, args.times, 1)
+multiple = time_run(tasksize, args.times, args.nthreads)
 
 speedup = float(single) / multiple
 
