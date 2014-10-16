@@ -8,6 +8,7 @@
 #include <vector>
 #include <stdexcept>
 #include <string>
+#include <sched.h>
 
 class Threading {
 
@@ -54,6 +55,11 @@ class Threading {
 
         // (Private) constructor taking thread count.
         Threading(int nthreadsArg) : nthreads(nthreadsArg), remaining(0) {
+            cpu_set_t cpuset;
+            CPU_ZERO(&cpuset);
+            CPU_SET(0, &cpuset);
+            sched_setaffinity(0, sizeof(cpu_set_t), &cpuset);
+
             // Create atomics for communication with threads
             tasksArray = new boost::atomic<boost::function0<void> *> *[nthreads];
             for (int i = 1; i < nthreads; i++) {
@@ -91,6 +97,11 @@ class Threading {
         }
 
         void threadBody(int threadId) {
+            cpu_set_t cpuset;
+            CPU_ZERO(&cpuset);
+            CPU_SET(threadId, &cpuset);
+            sched_setaffinity(0, sizeof(cpu_set_t), &cpuset);
+
             while (true) {
                 boost::function0<void> *task = NULL;
                 while((task = tasksArray[threadId]->load(boost::memory_order_relaxed)) == NULL) {

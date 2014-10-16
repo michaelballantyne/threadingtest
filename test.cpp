@@ -16,10 +16,10 @@ int fact(int val) {
     }
 }
 
-void runFact(int times) {
+void runFact(long times) {
     long res = 0;
-    for (int i = 0; i < times; i++) {
-        for (int j = 0; j < 100; j++) {
+    for (long i = 0; i < times; i++) {
+        for (long j = 0; j < 100; j++) {
             res += fact(j);
         }
     }
@@ -30,9 +30,9 @@ int main(int argc, const char *argv[])
 {
     po::options_description desc("options");
     desc.add_options()
-        ("nthreads", po::value<int>(), "")
-        ("times", po::value<int>(), "")
-        ("tasksize", po::value<int>(), "")
+        ("nthreads", po::value<long>(), "")
+        ("times", po::value<long>(), "")
+        ("tasksize", po::value<long>(), "")
         ;
 
     po::variables_map args;
@@ -40,16 +40,16 @@ int main(int argc, const char *argv[])
     po::notify(args);
 
 
-    int nthreads = args["nthreads"].as<int>();
-    int times = args["times"].as<int>();
-    int tasksize = args["tasksize"].as<int>();
+    long nthreads = args["nthreads"].as<long>();
+    long times = args["times"].as<long>();
+    long tasksize = args["tasksize"].as<long>();
 
     Threading::setup(nthreads);
 
     boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::universal_time();
-    for (int n = 0; n < times; n++) {
+    for (long n = 0; n < times; n++) {
         std::vector<boost::function0<void> > tasks(nthreads);
-        for (int i = 0; i < nthreads; i++) {
+        for (long i = 0; i < nthreads; i++) {
             tasks[i] = boost::bind(runFact, tasksize / nthreads);
         }
         Threading::getInstance().scheduleTasks(tasks);
