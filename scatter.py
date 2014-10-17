@@ -10,7 +10,7 @@ def time_run(tasksize, times, nthreads):
     out = subprocess.check_output(["./a.out", "--tasksize", str(tasksize), "--times", str(times), "--nthreads", str(nthreads)])
     return int(out)
 
-total_size = 8192 * args.nthreads * 2
+total_size = 8192 * args.nthreads * 8
 
 tasksize = 1
 

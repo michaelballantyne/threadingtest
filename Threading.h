@@ -37,6 +37,7 @@ class Threading {
             tasks[0]();
 
             while(remaining.load(boost::memory_order_acquire) > 0) {
+                __asm__ __volatile__ ("pause;");
                 // Spin until done
             }
         }
@@ -105,6 +106,7 @@ class Threading {
             while (true) {
                 boost::function0<void> *task = NULL;
                 while((task = tasksArray[threadId]->load(boost::memory_order_relaxed)) == NULL) {
+                    __asm__ __volatile__ ("pause;");
                     // Wait for work
                 }
 
