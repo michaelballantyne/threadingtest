@@ -1,6 +1,3 @@
-#ifndef NEBO_THREADING_H
-#define NEBO_THREADING_H
-
 #include <boost/atomic.hpp>
 #include <boost/function.hpp>
 #include <boost/thread.hpp>
@@ -22,22 +19,15 @@ class Threading {
         }
 
         void scheduleTasks(std::vector<boost::function0<void> > & tasks) {
-            //if (tasks.size() != nthreads) {
-            //throw std::invalid_argument("ntasks must match nthreads");
-            //}
+            remaining.store(nthreads - 1, boost::memory_order_release);
 
             for (int i = 1; i < nthreads; i++) {
-                tasksArray[i]->store(&tasks[i], boost::memory_order_relaxed);
+                tasksArray[i]->store(&tasks[i], boost::memory_order_release);
             }
-
-            remaining.store(nthreads - 1, boost::memory_order_relaxed);
-
-            atomic_thread_fence(boost::memory_order_release);
 
             tasks[0]();
 
             while(remaining.load(boost::memory_order_acquire) > 0) {
-                __asm__ __volatile__ ("pause;");
                 // Spin until done
             }
         }
@@ -76,7 +66,6 @@ class Threading {
 
         // I probably don't need this whole thing at all.
         ~Threading() {
-
             // Interrupt and threads and wait for them to die.
             for (int i = 1; i < nthreads; i++) {
                 threadsArray[i]->interrupt();
@@ -103,10 +92,10 @@ class Threading {
             CPU_SET(threadId, &cpuset);
             sched_setaffinity(0, sizeof(cpu_set_t), &cpuset);
 
+            //                pthread_setname_np(std::to_string(threadId).c_str());
             while (true) {
                 boost::function0<void> *task = NULL;
                 while((task = tasksArray[threadId]->load(boost::memory_order_relaxed)) == NULL) {
-                    __asm__ __volatile__ ("pause;");
                     // Wait for work
                 }
 
@@ -119,13 +108,8 @@ class Threading {
                 tasksArray[threadId]->store(NULL, boost::memory_order_relaxed);
 
                 remaining.fetch_sub(1, boost::memory_order_release);
-
-                //boost::this_thread::interruption_point();
             }
         }
 };
 
 Threading * Threading::instance = NULL;
-
-#endif
-
